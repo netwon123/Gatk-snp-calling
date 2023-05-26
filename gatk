@@ -1,0 +1,17 @@
+bwa index ~/assembly_pacbio/Duroc/Duroc.fna
+
+bwa mem -t 16 ~/assembly_pacbio/Duroc/Duroc.fna FP150001891TR_L01_266_1_clean.fq.gz FP150001891TR_L01_266_2_clean.fq.gz > FP150001891TR_L01_266.sam
+
+ls ./*.sam | while read id;
+do
+samtools view -bS $id | samtools sort -@ 16 -O BAM -o ${id}.sorted.bam -
+done
+
+
+ls ./*.sam | while read id;
+do
+samtools flagstat -@ 16 $id >  ${id}.flagstat_minimap.tax
+done
+
+
+gatk MarkDuplicates -I FP150001891TR_L01_266.sorted.bam -O FP150001891TR_L01_266_rmM.sorted.bam --REMOVE_SEQUENCING_DUPLICATES true -M FP150001891TR_L01_266_rmM.log
