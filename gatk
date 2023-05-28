@@ -1,6 +1,8 @@
 bwa index ~/assembly_pacbio/Duroc/Duroc.fna
+gatk CreateSequenceDictionary -R ~/assembly_pacbio/Duroc/Duroc.fna -O ~/assembly_pacbio/Duroc/Duroc.dict
 
 bwa mem -t 16 ~/assembly_pacbio/Duroc/Duroc.fna FP150001891TR_L01_266_1_clean.fq.gz FP150001891TR_L01_266_2_clean.fq.gz > FP150001891TR_L01_266.sam
+#bwa mem -t 4 -R '@RG\tID:id1\tPL:illumina\tSM:test' ref.fa test_1.fq test_2.fq | samtools view -bS - >test.bam
 
 ls ./*.sam | while read id;
 do
@@ -15,3 +17,9 @@ done
 
 
 gatk MarkDuplicates -I FP150001891TR_L01_266.sorted.bam -O FP150001891TR_L01_266_rmM.sorted.bam --REMOVE_SEQUENCING_DUPLICATES true -M FP150001891TR_L01_266_rmM.log
+
+#if you don't set the RG in the bwa step, you can use AddOrReplaceReadGroups module
+gatk AddOrReplaceReadGroups -I FP150001891TR_L01_273_rmM.sorted.bam -O FP150001891TR_L01_273_rmDup.sorted.bam -LB library1 -PL UNKNOWN -PU FP150001891TR_L01_273PU -SM FP150001891TR_L01_273
+
+samtools index *rmDup.sorted.bam -@ 8
+gatk HaplotypeCaller -R ~/assembly_pacbio/Duroc/Duroc.fna -I FP150001891TR_L01_266_rmDup.sorted.bam -O ./gvcf/FP150001891TR_L01_266.g.vcf -ERC GVCF
