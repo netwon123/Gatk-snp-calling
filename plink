@@ -1,0 +1,13 @@
+Plink常用的文件格式有两套：map/ped 和 bim/fam/bed。两组文件均没有列名，且每一列表示的意思是一定的。几种格式之间可以相互转换。推荐使用BED/BIM/FAM这种格式，读取速度快。
+#vcf to map/ped
+~/software/plink --vcf all.vcf.gz --recode --out testacc_qc  --maf 0.01 --geno 0.05 --indep-pairwise 1000 50 0.1 --const-fid --allow-extra-chr --threads 20
+#vcf to bim/fam/bed
+~/software/plink --allow-extra-chr --file testacc_qc --noweb --make-bed --out testacc_qc --threads 20
+#pca
+ plink --allow-extra-chr --threads 20 -bfile testacc_qc --pca 2 --out testacc_qc
+ Rscrept pca.R
+ #ibd
+ /plink --vcf all.vcf.gz  --const-fid --allow-extra-chr --genome --maf 0.01 --geno 0.05 --indep-pairwise 1000 50 0.1 --out IBD_result
+ Rscrept ibd.R
+ #tree
+ plink --file testacc_qc --distance-matrix --recode --out Distance.out --allow-extra-chr
