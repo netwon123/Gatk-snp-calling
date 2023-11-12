@@ -1,0 +1,13 @@
+install.packages("CMplot")
+library(data.table)
+library(CMplot)
+library(dplyr)
+
+
+map1 = fread("testacc_qc.map",header = F)
+head(map1)
+
+mm = map1 %>% dplyr::select(SNP = 2,Chromosome=1,Position = 4)
+head(mm)
+CMplot(mm,plot.type="d",bin.size=1e6,col=c("darkgreen", "yellow", "red"),
+       file="pdf",dpi=900,file.output=TRUE, verbose=TRUE)
