@@ -1,0 +1,1 @@
+python downsample_vcf.py single.vcf ${i}.sim.bma.vcf --rate 0.3
