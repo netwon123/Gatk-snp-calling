@@ -56,24 +56,41 @@ gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" 
 --variant FP150001902BL_L01_379_chr1.g.vcf.gz \
 -O merge.g.vcf.gz
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna --variant merge.g.vcf.gz -O merge.vcf.gz
-## 提取SNP
-gatk SelectVariants -V test.vcf -O test.snp.vcf --select-type-to-include SNP
 
-## 提取INDEL
-gatk SelectVariants -V test.vcf -O test.indel.vcf --select-type-to-include INDEL
+gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.snp.vcf --select-type-to-include SNP
 
-gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" VariantFiltration -O test.snp.fil.vcf.temp -V merge_snp.vcf.gz --filter-expression 'QUAL < 30.0 || QD < 2.0 || FS > 60.0 ||  SOR > 4.0' --filter-name lowQualFilter --cluster-window-size 10  --cluster-size 3 --missing-values-evaluate-as-failing
-gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -R ~/assembly/Duroc/Duroc.fa -V test.snp.fil.vcf --exclude-filtered -O test.snp.FINALY.vcf
+gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.indel.vcf --select-type-to-include INDEL
 
 
+gatk VariantFiltration \
+        -R ~/PGG_netwon/final_merge/backone_genome/backone.fa \
+        -V raw_snps.vcf \
+        -O filtered_snps.vcf \
+        -filter-name "QD_filter" -filter "QD < 2.0" \
+        -filter-name "FS_filter" -filter "FS > 60.0" \
+        -filter-name "MQ_filter" -filter "MQ < 40.0" \
+        -filter-name "SOR_filter" -filter "SOR > 4.0" \
+        -filter-name "MQRankSum_filter" -filter "MQRankSum < -12.5" \
+        -filter-name "ReadPosRankSum_filter" -filter "ReadPosRankSum < -8.0" \
+		--cluster-window-size 10  --cluster-size 3 --missing-values-evaluate-as-failing
+		#QD这个值描述的实际上就是单位深度的变异质量值，也可以理解为是对变异质量值的一个归一化，QD越高一般来说变异的可信度也越高。在质控的时候，相比于QUAL或者DP（深度）来说，QD是一个更加合理的值。因为我们知道，原始的变异质量值实际上与覆盖的read数目是密切相关的，深度越高的位点QUAL一般都是越高的，而任何一个测序数据，
+都不可避免地会存在局部深度不均的情况，如果直接使用QUAL或者DP都会很容易因为覆盖深度的差异而带来有偏的质控结果。
+		
+	gatk VariantFiltration \
+        -R ~/PGG_netwon/final_merge/backone_genome/backone.fa \
+        -V raw_indels.vcf \
+        -O filtered_indels.vcf \
+        -filter-name "QD_filter" -filter "QD < 2.0" \
+        -filter-name "FS_filter" -filter "FS > 200.0" \
+        -filter-name "SOR_filter" -filter "SOR > 10.0"
+		
+		
+gatk SelectVariants \
+        --exclude-filtered \
+        -V filtered_snps.vcf \
+        -O bqsr_snps.vcf
+gatk SelectVariants \
+        --exclude-filtered \
+        -V filtered_indels.vcf \
+        -O bqsr_indels.vcf
 
-
-
-#extact chr1
-grep "^#\|^NC_010443\.5" FP150001891TR_L01_266.g.vcf > onlychr1/FP150001891TR_L01_266_chr1.g.vcf
-gatk IndexFeatureFile -I FP150001891TR_L01_266_chr1.g.vcf.gz
-bcftools annotate --rename-chrs dy.txt output.vcf.gz > other_chr1.vcf.gz
-#~/software/tabix-0.2.6/bgzip other_chr1.vcf
-#bcftools merge other_chr1.vcf.gz merge.vcf.gz -Oz -o all.vcf.gz
-#bcftools index all.vcf.gz
-bcftools view --threads 56 -S resered.txt other_chr1.vcf.gz -Ov > other_chr1_final.vcf.gz
