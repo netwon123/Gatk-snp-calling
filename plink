@@ -11,6 +11,12 @@ Plink常用的文件格式有两套：map/ped 和 bim/fam/bed。两组文件均�
  Rscrept ibd.R
  #tree
  plink --file testacc_qc --distance-matrix --recode --out Distance.out --allow-extra-chr
+awk '{print $2"           "}' 58inds_maf005_geno01_phased.mdist.id | cut -c1-10 > 58inds_maf005_geno01_phased_phylip.id 
+###合并数据矩阵并添加表头（即物种个数58）
+paste -d '' 58inds_maf005_geno01_phased_phylip.id 58inds_maf005_geno01_phased.mdist | sed '1i 58' > 58inds_maf005_geno01_phased_phylip.mdist
+neighbor
+
+#tree2
 #tree#https://github.com/hewm2008/VCF2Dis/tree/main
 ./VCF2Dis-1.50/bin/VCF2Dis -InPut pop_final.vcf -OutPut pca_dis_all.mat
  ~/software/PHYLIPNEW-3.69.650/bin/fneighbor -datafile pca_dis_all.mat  -outfile tree.out1.txt -matrixtype s -treetype n -outtreefile tree.out2.tre
