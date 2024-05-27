@@ -18,5 +18,5 @@ neighbor
 
 #tree2
 #tree#https://github.com/hewm2008/VCF2Dis/tree/main
-./VCF2Dis-1.50/bin/VCF2Dis -InPut pop_final.vcf -OutPut pca_dis_all.mat
+/public/home/baoqi/SVanalysis/analysis/VCF2Dis-1.50/bin/VCF2Dis -InPut pop_final.vcf -OutPut pca_dis_all.mat
  ~/software/PHYLIPNEW-3.69.650/bin/fneighbor -datafile pca_dis_all.mat  -outfile tree.out1.txt -matrixtype s -treetype n -outtreefile tree.out2.tre
