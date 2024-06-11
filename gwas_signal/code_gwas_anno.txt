@@ -1,0 +1,12 @@
+ ls *ps | while read id; do awk '$4 < 1.25E-6' $id > ${id}_sig.snp; done
+ls *snp | while read id; do awk  '{ print $1 }' $id  | sed 's/ /\t/g' > ${id}.id;done
+ls *id | while read id; do awk -F':' '{ print $1, $2,$2+1 }' $id  | sed 's/ /\t/g' > ${id}.id2;done
+ls *id2 | while read id; do bedtools slop -i $id -g chr.size -b 50000 > ${id}_50k.bed;done
+
+
+
+
+#anno
+ls *bed | while read id;do bedtools intersect -a $id -b ~/yak/annotation/genes.bed  -loj > ${id}.anno.bed;done
+ ls *.anno.bed | while read id;do awk -v OFS="\t" '{print $1,$2,$3,$7}' $id | uniq > ${id}_uniq;done
+ls *uniq | while read id; do cut -f4 $id | uniq > ${id}.gene;done

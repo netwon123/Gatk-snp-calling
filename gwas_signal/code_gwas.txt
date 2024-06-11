@@ -1,0 +1,29 @@
+
+#.ps =gwas output
+
+ls *ps | while read id; do cat ../yakgwas.map | paste - $id | awk '{print $2,$1,$4,$8}' | sed '1i\SNP CHR BP P' | sed 's/ /\t/g' > ${id}.output;done
+
+
+
+
+
+
+setwd('G:/博士/project_yak_wu/03_gwas/')
+library(CMplot)
+
+
+
+
+data=read.table('gwas.output',header = TRUE)
+df <- data.frame(data$SNP,data$CHR,data$BP,data$P)
+names(df) <- c("SNP","Chromosome","Position","p")
+
+
+
+CMplot(df,plot.type="m",band=0,threshold =1.25E-6,threshold.col="black",amplify=TRUE,col=c('#fc4e07','#239fdf'),
+       LOG10=TRUE,ylab=expression(-log[10](P.value)),
+       pch=19,cex = 0.5,dpi=100,file.output=TRUE,conf.int=F,file.name='test.manhat.jpg')
+
+
+
+CMplot(df,plot.type = "q",cex = 0.5,conf.int=F,dpi=100,file.name= 'test.qq.jpg')

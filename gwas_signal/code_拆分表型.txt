@@ -1,0 +1,62 @@
+setwd('G:/博士/project_yak_wu/03_gwas/phe/')
+p2=read.csv('GN.csv',header = TRUE)
+p3=read.csv('HY.csv',header = TRUE)
+p4=read.csv('NR.csv',header = TRUE)
+p1=read.csv('TZ.csv',header = TRUE)
+
+
+
+#------------
+phe=c("PLT", "HCT", "MCHC", "HGB", "WBC", "NE", "LY", "NEU", "LYM", "RBC", "MCV", "MCH", "RDW", "PCT", "MPV", "PDW", "MON", "MO", "ph", "Acetic", "Propionic", "Isobutyric", "Butyric", "Isovaleric", "Valeric", "Total_volatile",
+     "Anabaena_sp_YBS01"
+     ,"Prevotella_ruminicola"
+     ,"Prevotella_sp_E15_22"
+     ,"Prevotella_sp_E2_28"
+     ,"Paenibacillus_larvae"
+     ,"Prevotella_sp_E9_3"
+     ,"Prevotella_sp_E13_17"
+     ,"Prevotella_sp_E13_3"
+     ,"Prevotella_sp_Rep29"
+     ,"Prevotella_bryantii"
+     ,"Butyrivibrio_fibrisolvens"
+     ,"Clostridium_botulinum"
+     ,"Fibrobacter_succinogenes"
+)
+
+# 定义数据框列表
+data_frames <- list(p1, p2, p3, p4)
+
+# 循环处理每个phe
+for (p in phe) {
+  # 检查每个数据框是否包含当前phe列
+  if (all(sapply(data_frames, function(df) p %in% colnames(df)))) {
+    # 创建文件名
+    file_name <- paste0(p, ".txt")
+    
+    # 创建空数据框
+    merged_df <- NULL
+    
+    # 循环处理每个数据框
+    for (i in seq_along(data_frames)) {
+      # 获取当前phe列和ID列
+      current_df <- data_frames[[i]]
+      current_phe <- current_df[, p]
+      current_id <- current_df[, "id"]
+      
+      # 合并ID和当前phe列
+      current_data <- cbind(current_id, current_phe)
+      
+      # 合并到merged_df
+      if (is.null(merged_df)) {
+        merged_df <- current_data
+      } else {
+        merged_df <- rbind(merged_df, current_data)
+      }
+    }
+    
+    # 将合并的数据写入文件
+    write.table(merged_df, file = file_name, sep = "\t", row.names = FALSE, col.names = FALSE, quote = FALSE)
+  } else {
+    cat("Skipping", p, "because it doesn't exist in all data frames.\n")
+  }
+}
