@@ -1,4 +1,4 @@
-**#index genome**
+#index genome
 bwa index ~/assembly_pacbio/Duroc/Duroc.fna
 gatk CreateSequenceDictionary -R ~/assembly_pacbio/Duroc/Duroc.fna -O ~/assembly_pacbio/Duroc/Duroc.dict
 
