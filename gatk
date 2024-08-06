@@ -1,26 +1,25 @@
+#index genome
 bwa index ~/assembly_pacbio/Duroc/Duroc.fna
 gatk CreateSequenceDictionary -R ~/assembly_pacbio/Duroc/Duroc.fna -O ~/assembly_pacbio/Duroc/Duroc.dict
 
-bwa mem -t 16 ~/assembly_pacbio/Duroc/Duroc.fna FP150001891TR_L01_266_1_clean.fq.gz FP150001891TR_L01_266_2_clean.fq.gz > FP150001891TR_L01_266.sam
-#bwa mem -t 4 -R '@RG\tID:id1\tPL:illumina\tSM:test' ref.fa test_1.fq test_2.fq | samtools view -bS - >test.bam
+#alignment
+bwa mem -t 4 -R '@RG\tID:id1\tPL:illumina\tSM:test' ref.fa test_1.fq test_2.fq | samtools view -bS - >test.bam
+#bwa mem -t 16 ~/assembly_pacbio/Duroc/Duroc.fna FP150001891TR_L01_266_1_clean.fq.gz FP150001891TR_L01_266_2_clean.fq.gz > FP150001891TR_L01_266.sam
 
+#sam to sorted bam
 ls ./*.sam | while read id;
 do
 samtools view -bS $id | samtools sort -@ 16 -O BAM -o ${id}.sorted.bam -
 done
 
-
-ls ./*.sam | while read id;
+#calculated mapping ratio
+ls ./*.sorted.bam | while read id;
 do
 samtools flagstat -@ 16 $id >  ${id}.flagstat_minimap.tax
 done
 
-
+#rm dup nad indexed bam file
 gatk MarkDuplicates -I FP150001891TR_L01_266.sorted.bam -O FP150001891TR_L01_266_rmM.sorted.bam --REMOVE_SEQUENCING_DUPLICATES true -M FP150001891TR_L01_266_rmM.log
-
-#if you don't set the RG in the bwa step, you can use AddOrReplaceReadGroups module
-gatk AddOrReplaceReadGroups -I FP150001891TR_L01_273_rmM.sorted.bam -O FP150001891TR_L01_273_rmDup.sorted.bam -LB library1 -PL UNKNOWN -PU FP150001891TR_L01_273PU -SM FP150001891TR_L01_273
-
 ls ./*rmDup.sorted.bam | while read id;
 do
   file=$(basename $id )
@@ -28,8 +27,12 @@ do
   samtools index -@ 8 $id
 done
 
+#if you don't set the RG in the bwa step, you can use AddOrReplaceReadGroups module
+#gatk AddOrReplaceReadGroups -I FP150001891TR_L01_273_rmM.sorted.bam -O FP150001891TR_L01_273_rmDup.sorted.bam -LB library1 -PL illumina -PU FP150001891TR_L01_273PU -SM FP150001891TR_L01_273
 
 
+
+#call variants (gvcf)
 gatk HaplotypeCaller -R ~/assembly_pacbio/Duroc/Duroc.fna -I FP150001891TR_L01_266_rmDup.sorted.bam -O ./gvcf/FP150001891TR_L01_266.g.vcf -ERC GVCF
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" CombineGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna \
 --variant FP150001891TR_L01_297_chr1.g.vcf.gz \
@@ -55,15 +58,14 @@ gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" 
 --variant FP150001902BL_L01_378_chr1.g.vcf.gz \
 --variant FP150001902BL_L01_379_chr1.g.vcf.gz \
 -O merge.g.vcf.gz
-
-
-###snp/indel filting
-
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna --variant merge.g.vcf.gz -O merge.vcf.gz
+
+#extracted snp/indel
 gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.snp.vcf --select-type-to-include SNP
 gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.indel.vcf --select-type-to-include INDEL
 
-
+#filted SNP/indel
+(1)SNP
 gatk VariantFiltration \
         -R ~/PGG_netwon/final_merge/backone_genome/backone.fa \
         -V raw_snps.vcf \
@@ -74,11 +76,17 @@ gatk VariantFiltration \
         -filter-name "SOR_filter" -filter "SOR > 4.0" \
         -filter-name "MQRankSum_filter" -filter "MQRankSum < -12.5" \
         -filter-name "ReadPosRankSum_filter" -filter "ReadPosRankSum < -8.0" \
-		--cluster-window-size 10  --cluster-size 3 --missing-values-evaluate-as-failing
-		#QD这个值描述的实际上就是单位深度的变异质量值，也可以理解为是对变异质量值的一个归一化，QD越高一般来说变异的可信度也越高。在质控的时候，相比于QUAL或者DP（深度）来说，QD是一个更加合理的值。因为我们知道，原始的变异质量值实际上与覆盖的read数目是密切相关的，深度越高的位点QUAL一般都是越高的，而任何一个测序数据，
+    	--cluster-window-size 10  --cluster-size 3 --missing-values-evaluate-as-failing
+#QD这个值描述的实际上就是单位深度的变异质量值，也可以理解为是对变异质量值的一个归一化，QD越高一般来说变异的可信度也越高。在质控的时候，相比于QUAL或者DP（深度）来说，QD是一个更加合理的值。因为我们知道，原始的变异质量值实际上与覆盖的read数目是密切相关的，深度越高的位点QUAL一般都是越高的，而任何一个测序数据，
 都不可避免地会存在局部深度不均的情况，如果直接使用QUAL或者DP都会很容易因为覆盖深度的差异而带来有偏的质控结果。
-		
-	gatk VariantFiltration \
+
+gatk SelectVariants \
+        --exclude-filtered \
+        -V filtered_snps.vcf \
+        -O bqsr_snps.vcf
+
+(2)INDEL		
+gatk VariantFiltration \
         -R ~/PGG_netwon/final_merge/backone_genome/backone.fa \
         -V raw_indels.vcf \
         -O filtered_indels.vcf \
@@ -86,11 +94,6 @@ gatk VariantFiltration \
         -filter-name "FS_filter" -filter "FS > 200.0" \
         -filter-name "SOR_filter" -filter "SOR > 10.0"
 		
-		
-gatk SelectVariants \
-        --exclude-filtered \
-        -V filtered_snps.vcf \
-        -O bqsr_snps.vcf
 gatk SelectVariants \
         --exclude-filtered \
         -V filtered_indels.vcf \
