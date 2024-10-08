@@ -1,0 +1,33 @@
+# 定义VCF文件路径和输出目录
+VCF_PATH="/public/home/baoqi/usb1/analysys/02_pop_structure/wgs97_autochrom.sort_rmM.vcf.gz"
+OUT_DIR="fst_results"
+WINDOW_SIZE=50000
+WINDOW_STEP=10000
+
+# 创建输出目录
+mkdir -p ${OUT_DIR}
+
+# 获取所有群体文件
+POP_FILES=($(ls *.txt))
+
+# 双重循环遍历每个群体文件的两两组合
+for ((i=0; i<${#POP_FILES[@]}; i++)); do
+    for ((j=i+1; j<${#POP_FILES[@]}; j++)); do
+        POP1=${POP_FILES[$i]}
+        POP2=${POP_FILES[$j]}
+
+        # 去掉.txt后缀，合并文件名
+        OUT_FILE="${OUT_DIR}/${POP1%.txt}_${POP2%.txt}_bin"
+
+        echo "Calculating FST between $POP1 and $POP2"
+
+        # 执行vcftools进行FST计算
+        vcftools --gzvcf ${VCF_PATH} \
+                 --weir-fst-pop ${POP1} \
+                 --weir-fst-pop ${POP2} \
+                 --out ${OUT_FILE} \
+                 --fst-window-size ${WINDOW_SIZE} \
+                 --fst-window-step ${WINDOW_STEP} --maf 0.05 --max-missing 0.9
+    done
+done
+~
