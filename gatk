@@ -99,3 +99,4 @@ gatk SelectVariants \
         -V filtered_indels.vcf \
         -O bqsr_indels.vcf
 
+#https://www.jianshu.com/p/8379c3aec41b
