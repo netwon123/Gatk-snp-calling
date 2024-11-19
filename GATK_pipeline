@@ -61,8 +61,8 @@ gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" 
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna --variant merge.g.vcf.gz -O merge.vcf.gz
 
 #extracted snp/indel
-gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.snp.vcf --select-type-to-include SNP
-gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.indel.vcf --select-type-to-include INDEL
+gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.snp.vcf --select-type-to-include SNP -R ..fa
+gatk --java-options "-Xms32G -Xmx192G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" SelectVariants -V span_298_snp_rename.vcf.gz -O span_298.indel.vcf --select-type-to-include INDEL -R ..fa
 
 #filted SNP/indel
 (1)SNP
