@@ -1,0 +1,57 @@
+library(ggplot2)
+library(viridis)
+setwd('G:/博士/泛基因组组/PGG-project/01_analysis/01_SV stats/12_SV_density/03_vis_allgenome/')
+chr<-read.table("chr.bed",sep="\t",header=F)
+colnames(chr)=c('Chromosome', 'chromStart', 'chromEnd')
+chr2=data.frame(chr$chromStart,chr$chromEnd)
+xlim=as.matrix(chr2)
+#------------chr------------------
+circos.clear()
+circos.initialize(factors=chr$Chromosome,xlim=xlim)
+circos.track(ylim=c(0,1),panel.fun=function(x,y) {
+  chr=CELL_META$sector.index
+  xlim=CELL_META$xlim
+  ylim=CELL_META$ylim
+  circos.text(mean(xlim),mean(ylim),chr,cex=0.5,col="grey40",
+              facing="bending.inside",niceFacing=TRUE)
+},bg.col="grey90",bg.border=F,track.height=0.06)
+# genomes x axis (Mb)
+brk <- c(50,100,150,200,250,300)*10^6
+
+circos.track(track.index = get.current.track.index(), panel.fun = function(x, y) {
+  circos.axis(h="top",major.at=brk,labels=round(brk/10^6,1),labels.col="grey40",lwd=0.7,labels.cex=0.4)})
+
+#--------------------read the denesity----------
+
+ins<-read.table("ins_density.txt",sep="\t",header=F)
+del<-read.table("del_density.txt",sep="\t",header=F)
+dup<-read.table("dup_density.txt",sep="\t",header=F)
+inv<-read.table("inv_density.txt",sep="\t",header=F)
+bnd<-read.table("bnd_density.txt",sep="\t",header=F)
+
+ins<-ins[,c(1,2,3,4)]
+colnames(ins)<-c("Chr","X","Y",'denesity')
+del<-del[,c(1,2,3,4)]
+colnames(del)<-c("Chr","X","Y",'denesity')
+dup<-dup[,c(1,2,3,4)]
+colnames(dup)<-c("Chr","X","Y",'denesity')
+inv<-inv[,c(1,2,3,4)]
+colnames(inv)<-c("Chr","X","Y",'denesity')
+bnd<-bnd[,c(1,2,3,4)]
+colnames(bnd)<-c("Chr","X","Y",'denesity')
+
+#-----plot--------------
+
+
+circos.trackPlotRegion(factors=del$Chr,y=del$Y,track.height=0.1)
+circos.trackLines(del$Chr,del$X,del$Y,col='#a02632')
+circos.trackPlotRegion(factors=dup$Chr,y=dup$Y,track.height=0.1)
+circos.trackLines(dup$Chr,dup$X,dup$Y,col='#4e7aeb')
+circos.trackPlotRegion(factors=inv$Chr,y=inv$Y,track.height=0.1)
+circos.trackLines(inv$Chr,inv$X,inv$Y,col='#8667c2')
+circos.trackPlotRegion(factors=bnd$Chr,y=bnd$Y,track.height=0.1)
+circos.trackLines(bnd$Chr,bnd$X,bnd$Y,col='#d8d8d8')
+circos.clear()
+
+
+
