@@ -7,6 +7,7 @@ chr2=data.frame(chr$chromStart,chr$chromEnd)
 xlim=as.matrix(chr2)
 #------------chr------------------
 circos.clear()
+
 circos.initialize(factors=chr$Chromosome,xlim=xlim)
 circos.track(ylim=c(0,1),panel.fun=function(x,y) {
   chr=CELL_META$sector.index
@@ -23,12 +24,14 @@ circos.track(track.index = get.current.track.index(), panel.fun = function(x, y)
 
 #--------------------read the denesity----------
 
-ins<-read.table("ins_density.txt",sep="\t",header=F)
-del<-read.table("del_density.txt",sep="\t",header=F)
-dup<-read.table("dup_density.txt",sep="\t",header=F)
-inv<-read.table("inv_density.txt",sep="\t",header=F)
-bnd<-read.table("bnd_density.txt",sep="\t",header=F)
-
+ins<-read.table("ins_num.txt",sep="\t",header=F)
+del<-read.table("del_num.txt",sep="\t",header=F)
+dup<-read.table("dup_num.txt",sep="\t",header=F)
+inv<-read.table("inv_num.txt",sep="\t",header=F)
+bnd<-read.table("bnd_num.txt",sep="\t",header=F)
+gene<-read.table("gene_num.txt",sep="\t",header=F)
+gene<-ins[,c(1,2,3,4)]
+colnames(gene)<-c("Chr","X","Y",'denesity')
 ins<-ins[,c(1,2,3,4)]
 colnames(ins)<-c("Chr","X","Y",'denesity')
 del<-del[,c(1,2,3,4)]
@@ -42,16 +45,23 @@ colnames(bnd)<-c("Chr","X","Y",'denesity')
 
 #-----plot--------------
 
+#gene
+col_fun <- colorRamp2(seq(min(gene$denesity), max(gene$denesity), length.out = 2), c("white" ,"#f99624"))
+circos.genomicHeatmap(gene, heatmap_height=0.05,na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
+#ins
+col_fun <- colorRamp2(seq(min(ins$denesity), max(ins$denesity), length.out = 2), c("white" ,"#8667c2"))
+circos.genomicHeatmap(ins,  heatmap_height=0.08,na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
+#del
+col_fun <- colorRamp2(seq(min(del$denesity), max(del$denesity), length.out = 2), c("white" ,"#a02632"))
+circos.genomicHeatmap(del, heatmap_height=0.08,na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
+#dup
+col_fun <- colorRamp2(seq(min(dup$denesity), max(dup$denesity), length.out = 2), c("white" ,"#4e7aeb"))
+circos.genomicHeatmap(dup,heatmap_height=0.08, na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
+#inv
+col_fun <- colorRamp2(seq(min(inv$denesity), max(inv$denesity), length.out = 2), c("white" ,"#666245"))
+circos.genomicHeatmap(inv, heatmap_height=0.08,na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
+#bnd
+col_fun <- colorRamp2(seq(min(bnd$denesity), max(bnd$denesity), length.out = 2), c("white" ,"#d8d8d8"))
+circos.genomicHeatmap(bnd,heatmap_height=0.08, na_col = "grey",connection_height = NULL,numeric.column ='denesity',col=col_fun)
 
-circos.trackPlotRegion(factors=del$Chr,y=del$Y,track.height=0.1)
-circos.trackLines(del$Chr,del$X,del$Y,col='#a02632')
-circos.trackPlotRegion(factors=dup$Chr,y=dup$Y,track.height=0.1)
-circos.trackLines(dup$Chr,dup$X,dup$Y,col='#4e7aeb')
-circos.trackPlotRegion(factors=inv$Chr,y=inv$Y,track.height=0.1)
-circos.trackLines(inv$Chr,inv$X,inv$Y,col='#8667c2')
-circos.trackPlotRegion(factors=bnd$Chr,y=bnd$Y,track.height=0.1)
-circos.trackLines(bnd$Chr,bnd$X,bnd$Y,col='#d8d8d8')
 circos.clear()
-
-
-
