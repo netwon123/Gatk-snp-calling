@@ -36,9 +36,8 @@ done
 gatk HaplotypeCaller -R ~/assembly_pacbio/Duroc/Duroc.fna -I FP150001891TR_L01_266_rmDup.sorted.bam -O ./gvcf/FP150001891TR_L01_266.g.vcf -ERC GVCF
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" CombineGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna \
 --variant gvcf.list \
--variant FP150001891TR_L01_308_chr1.g.vcf.gz \
-
 -O merge.g.vcf.gz
+
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna --variant merge.g.vcf.gz -O merge.vcf.gz
 
 #extracted snp/indel
