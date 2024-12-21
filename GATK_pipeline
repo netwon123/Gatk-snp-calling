@@ -35,28 +35,9 @@ done
 #call variants (gvcf)
 gatk HaplotypeCaller -R ~/assembly_pacbio/Duroc/Duroc.fna -I FP150001891TR_L01_266_rmDup.sorted.bam -O ./gvcf/FP150001891TR_L01_266.g.vcf -ERC GVCF
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" CombineGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna \
---variant FP150001891TR_L01_297_chr1.g.vcf.gz \
---variant FP150001891TR_L01_298_chr1.g.vcf.gz \
---variant FP150001891TR_L01_299_chr1.g.vcf.gz \
---variant FP150001891TR_L01_300_chr1.g.vcf.gz \
---variant FP150001891TR_L01_301_chr1.g.vcf.gz \
---variant FP150001891TR_L01_302_chr1.g.vcf.gz \
---variant FP150001891TR_L01_304_chr1.g.vcf.gz \
---variant FP150001891TR_L01_305_chr1.g.vcf.gz \
---variant FP150001891TR_L01_306_chr1.g.vcf.gz \
---variant FP150001891TR_L01_307_chr1.g.vcf.gz \
---variant FP150001891TR_L01_308_chr1.g.vcf.gz \
---variant FP150001891TR_L01_309_chr1.g.vcf.gz \
---variant FP150001891TR_L01_310_chr1.g.vcf.gz \
---variant FP150001891TR_L01_311_chr1.g.vcf.gz \
---variant FP150001891TR_L01_313_chr1.g.vcf.gz \
---variant FP150001891TR_L01_314_chr1.g.vcf.gz \
---variant FP150001891TR_L01_315_chr1.g.vcf.gz \
---variant FP150001891TR_L01_319_chr1.g.vcf.gz \
---variant FP150001891TR_L01_320_chr1.g.vcf.gz \
---variant FP150001902BL_L01_377_chr1.g.vcf.gz \
---variant FP150001902BL_L01_378_chr1.g.vcf.gz \
---variant FP150001902BL_L01_379_chr1.g.vcf.gz \
+--variant gvcf.list \
+-variant FP150001891TR_L01_308_chr1.g.vcf.gz \
+
 -O merge.g.vcf.gz
 gatk --java-options "-Xms32G -Xmx120G -DGATK_STACKTRACE_ON_USER_EXCEPTION=true" GenotypeGVCFs -R ~/assembly_pacbio/Duroc/Duroc.fna --variant merge.g.vcf.gz -O merge.vcf.gz
 
