@@ -13,3 +13,14 @@ bedtools coverage  -a genome_1000kb.txt -b indel.txt |awk 'BEGIN{OFS="\t"}{print
 head indel.txt 
 #merged all of the continuous hotspot windows
 bedtools merge indel_density.txt >indel_density_hotspot.txt
+
+
+#extract high-density bed 
+as=read.table('as_density.txt',header=T)
+quantile_value <- quantile(as$denesity, 0.9)
+top_10_percent_as <- as[as$denesity >= quantile_value, ]
+eu=read.table('eu_density.txt',header=T)
+quantile_value2 <- quantile(eu$denesity, 0.9)
+top_10_percent_eu <- eu[eu$denesity >= quantile_value2, ]
+write.table(top_10_percent_as,file='as_hotspot.bed',quote=F,row.names =F,sep='\t')
+write.table(top_10_percent_eu,file='eu_hotspot.bed',quote=F,row.names =F,sep='\t')
