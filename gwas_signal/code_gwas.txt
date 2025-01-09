@@ -7,23 +7,41 @@ ls *ps | while read id; do cat ../yakgwas.map | paste - $id | awk '{print $2,$1,
 
 
 
+folder_path <- "./"
 
-setwd('G:/博士/project_yak_wu/03_gwas/')
-library(CMplot)
+# 获取文件夹下所有.fst文件
+fst_files <- list.files(path = folder_path, pattern = "*.fst", full.names = TRUE)
 
-
-
-
-data=read.table('gwas.output',header = TRUE)
-df <- data.frame(data$SNP,data$CHR,data$BP,data$P)
-names(df) <- c("SNP","Chromosome","Position","p")
-
-
-
-CMplot(df,plot.type="m",band=0,threshold =1.25E-6,threshold.col="black",amplify=TRUE,col=c('#fc4e07','#239fdf'),
-       LOG10=TRUE,ylab=expression(-log[10](P.value)),
-       pch=19,cex = 0.5,dpi=100,file.output=TRUE,conf.int=F,file.name='test.manhat.jpg')
-
-
-
-CMplot(df,plot.type = "q",cex = 0.5,conf.int=F,dpi=100,file.name= 'test.qq.jpg')
+# 循环处理每个文件
+for (fst_file in fst_files) {
+  # 读取数据
+  data <- read.table(fst_file, header = TRUE)
+  
+  # 计算Mid和SNP列
+  data$Mid  <- (data$BIN_END - data$BIN_START) / 2 + data$BIN_START
+  data$SNP <- seq(1, nrow(data))
+  
+  # 过滤FST值大于0的行
+  data <- data[data$WEIGHTED_FST > 0, ]
+  
+  # 创建新的数据框
+  df <- data.frame(data$SNP, data$CHROM, data$Mid, data$WEIGHTED_FST)
+  names(df) <- c("SNP", "Chromosome", "Position", "FST")
+  
+  # 获取FST值的top 0.1%作为阈值
+  top_5_percent_value <- quantile(df$FST, 0.99)
+  
+  # 绘制曼哈顿图
+  output_pdf <- paste0("output_", tools::file_path_sans_ext(basename(fst_file)), ".pdf")
+  CMplot(df, plot.type = "m", col = c('#4DBBD5FF','#00A087FF'), LOG10 = FALSE, 
+         threshold = top_5_percent_value, threshold.lty = 2, threshold.lwd = 1, 
+         threshold.col = "black", amplify = FALSE, cex = 0.8, verbose = TRUE, 
+         ylab = 'Fst', file.output = TRUE, file.name = output_pdf,file="pdf")
+  
+  # 筛选出FST值大于阈值的行
+  top_5_percent <- data[data$WEIGHTED_FST > top_5_percent_value, ]
+  
+  # 保存为CSV文件
+  output_csv <- paste0("top_0.01_", tools::file_path_sans_ext(basename(fst_file)), ".csv")
+  write.csv(top_5_percent, output_csv, row.names = FALSE)
+}
