@@ -1,0 +1,58 @@
+setwd('G:/博士/特产所-水貂项目/01_GBS/06_re-GWAS/')
+
+folder_path <- "./"
+
+# 获取文件夹下所有.fst文件
+fst_files <- list.files(path = folder_path, pattern = "*.output", full.names = TRUE)
+
+# 循环处理每个文件
+for (fst_file in fst_files) {
+  data <- read.table(fst_file, header = TRUE)
+
+  output_pdf <- paste0("Manhattan_", tools::file_path_sans_ext(basename(fst_file)), ".pdf")
+CMplot(data,
+       
+       plot.type = "m",
+       
+       threshold =2.15E-6,#阈值设定，Bonfferoni法校正=0.01/nrow(Pmap)，通常以1/SNP总数为阈值。
+       
+       threshold.col=c('red'),#控制阈值线的颜色，注意要对应
+       
+       threshold.lty = 5,#阈值线的类型（7为实线，5为虚线）
+       
+       threshold.lwd = 1,#阈值线的宽度，也可以调整对角线的宽度，2最合适）
+       
+       amplify = T,#放大显示~显著性的SNP点
+       file="pdf",
+       file.name = output_pdf,
+       
+       signal.cex = 1,#设置有效SNP位点的大小,建议选用2/3号为宜
+       
+       signal.pch = 16,#设置有效SNP位点的形状，16和19为圆形。
+       
+       signal.col ='red'#有效SNP位点的颜色
+)
+}
+
+fst_files <- list.files(path = folder_path, pattern = "*.output", full.names = TRUE)
+
+# 循环处理每个文件
+for (fst_file in fst_files) {
+  data <- read.table(fst_file, header = TRUE)
+  
+qq_pdf <- paste0("QQ_", tools::file_path_sans_ext(basename(fst_file)), ".pdf")
+
+CMplot(data,
+       
+       plot.type="q",
+       
+       conf.int.col=NULL,#绘制QQ图中置信区间的颜色，可以用字符或向量
+       
+       box=TRUE,#是否添加边框
+       
+       file="pdf",
+       file.name = qq_pdf,
+       
+       file.output=TRUE,
+       
+       verbose=TRUE)}
