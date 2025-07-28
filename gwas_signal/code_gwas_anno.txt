@@ -9,4 +9,4 @@ ls *id2 | while read id; do bedtools slop -i $id -g chr.size -b 50000 > ${id}_50
 #anno
 ls *bed | while read id;do bedtools intersect -a $id -b ~/yak/annotation/genes.bed  -loj > ${id}.anno.bed;done
  ls *.anno.bed | while read id;do awk -v OFS="\t" '{print $1,$2,$3,$7}' $id | uniq > ${id}_uniq;done
-ls *uniq | while read id; do cut -f4 $id | uniq > ${id}.gene;done
+ls *uniq | while read id; do cut -f4 $id | sort | uniq > ${id}.gene;done
